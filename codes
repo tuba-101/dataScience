@@ -1,0 +1,66 @@
+# Step1: Import required packages
+
+from pandas import read_csv
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.svm import SVC
+import numpy as np
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+np.random.seed(0)
+
+# Step2: Load dataset
+train_data = pd.read_csv('heart.csv')
+train_data
+
+# Finds the NaN values
+train_data.isnull().sum()
+
+# Feature selection, importance value of each column is the output
+from sklearn.ensemble import ExtraTreesClassifier
+# load data
+
+array = train_data.values
+X = array[:,[0,1,2,3,4,5,6,7,8,9,10,11,12]]
+Y = array[:,1]
+# feature extraction
+model = ExtraTreesClassifier(n_estimators=10, random_state = 0)
+model.fit(X, Y.ravel())
+print(model.feature_importances_)
+
+#Separating features
+x = train_data.iloc[:, [0,1,2,3,4,5,6,7,8,9,10,11,12]]
+x
+
+#Seperating label which is "target"
+y = train_data.iloc[:, 13:14]
+y
+
+# Scale the data to be between -1 and 1, standardization
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+scaler.fit(x)
+x = scaler.transform(x)
+
+# Splitting the data into test data and train data
+x_tr, x_ts, y_tr, y_ts = train_test_split(x,y,test_size=0.25, random_state=1)
+
+# Step 4: Classifier training using Support Vector Machine 
+model = SVC(kernel='rbf', random_state = 0)
+model.fit(x_tr,y_tr.values.ravel())
+
+# Step 5: Check classifier accuracy on test data and see result 
+predict_survival = model.predict(x_ts)
+print("Accuracy: " + str(accuracy_score(y_ts, predict_survival) * 100) + '%')
+
+from sklearn.metrics import confusion_matrix
+cmtree=confusion_matrix(y_ts, predict_survival)
+cmtree
+
+plt.figure(figsize=(12,7))
+sns.heatmap(cmtree, annot=True)
+plt.xlabel('predicted')
+plt.ylabel('Truth')
